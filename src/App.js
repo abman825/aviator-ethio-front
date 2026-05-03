@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import './App.css';
 
-// ⚠️ ሰርቨሩን ከ Render ጋር ለማገናኘት የተስተካከለ አድራሻ
+// ሰርቨሩን ከ Render ጋር ለማገናኘት የተስተካከለ አድራሻ
 const SERVER_URL = 'https://aviator-ethio.onrender.com';
 
-
-// ሶኬቱ እንዳይሳሳት transports ተጨምሮበታል
+// የግንኙነት ጥራት እንዲጨምር polling ተጨምሯል
 const socket = io(SERVER_URL, {
-  transports: ['websocket'],
-  upgrade: false
+  transports: ['polling', 'websocket'],
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000
 });
 
 function App() {
@@ -18,7 +18,6 @@ function App() {
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login'); 
 
-  // --- የጨዋታ ሁኔታ (Game State) ---
   const [game, setGame] = useState({ 
     multiplier: 1.0, 
     status: 'waiting', 
@@ -31,27 +30,22 @@ function App() {
   const [balance, setBalance] = useState(0);
   const [userPhone, setUserPhone] = useState(""); 
   const [password, setPassword] = useState("");
-  const [level, setLevel] = useState(1.1);
 
-  // --- አቪዬተር ውርርድ (Double Bet States) ---
   const [bet1, setBet1] = useState({ amount: 10, isBetting: false, cashedOut: false });
   const [bet2, setBet2] = useState({ amount: 10, isBetting: false, cashedOut: false });
 
-  // --- አሸናፊነት ማሳያ (Win Overlays) ---
   const [win1, setWin1] = useState(null);
   const [win2, setWin2] = useState(null);
 
-  // --- የገንዘብ እንቅስቃሴ (Transaction States) ---
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [money, setMoney] = useState("");
   const [screenshot, setScreenshot] = useState(null);
-  const adminPhone = "0947493716";
 
   const upcomingGames = [
-    { id: 1, name: "Crazy Time", img: "https://unsplash.com" },
-    { id: 2, name: "Mines", img: "https://unsplash.com" },
-    { id: 3, name: "Penalty Shootout", img: "https://unsplash.com" }
+    { id: 1, name: "Crazy Time" },
+    { id: 2, name: "Mines" },
+    { id: 3, name: "Penalty Shootout" }
   ];
 
   useEffect(() => {
@@ -61,8 +55,8 @@ function App() {
         if (payload.status === 'crashed') {
           setBet1(prev => ({ ...prev, isBetting: false, cashedOut: false }));
           setBet2(prev => ({ ...prev, isBetting: false, cashedOut: false }));
-          setWin1(null); setWin2(null);
-          setLevel(prev => parseFloat((prev + 0.1).toFixed(1)));
+          setWin1(null); 
+          setWin2(null);
         }
       }
     });
@@ -72,62 +66,69 @@ function App() {
       alert("✅ ብር ገብቶልዎታል! አዲሱ ባላንስ: " + newBalance + " ETB");
     });
 
-    return () => socket.off();
+    return () => {
+      socket.off('data');
+      socket.off('balanceUpdate');
+    };
   }, []);
 
   const handleAuthAction = async () => {
     if (!userPhone || !password) return alert("እባክዎ መረጃዎችን ያስገቡ!");
     
-    
-const res = await fetch(`${SERVER_URL}/${authMode}`, { 
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ phone: userPhone, password })
-});
+    try {
+      // እዚህ ጋር አድራሻው ከሰርቨርህ /login እና /register ጋር እንዲገጥም ተደርጓል
+      const res = await fetch(`${SERVER_URL}/${authMode}`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: userPhone, password })
+      });
 
-    
-    const data = await res.json();
-    if (data.status === 'ok') {
-      if (authMode === 'login') {
-        setIsLoggedIn(true);
-        setBalance(data.balance);
-        setUserPhone(data.phone);
-        socket.emit('identify', data.phone); 
-        setShowAuth(false);
+      const data = await res.json();
+      if (data.status === 'ok') {
+        if (authMode === 'login') {
+          setIsLoggedIn(true);
+          setBalance(data.balance);
+          setUserPhone(data.phone);
+          socket.emit('identify', data.phone); 
+          setShowAuth(false);
+        } else {
+          alert("በተሳካ ሁኔታ ተመዝግበዋል! አሁን ይግቡ።");
+          setAuthMode('login');
+        }
       } else {
-        alert("በተሳካ ሁኔታ ተመዝግበዋል! አሁን ይግቡ።");
-        setAuthMode('login');
+        alert(data.error || "ስህተት ተፈጥሯል");
       }
-    } else {
-      alert(data.error);
+    } catch (err) {
+      alert("ከሰርቨር ጋር መገናኘት አልተቻለም። ሰርቨሩ መነሳቱን ያረጋግጡ።");
     }
   };
 
-  const handleAction = (type) => {
+  const handleAction = async (type) => {
     const amountNum = parseFloat(money);
     if (!amountNum || amountNum <= 0) return alert("ትክክለኛ መጠን ያስገቡ!");
-    const BOT_TOKEN = '8601691945:AAHuf1tKpCAmU6j6cOqp0i8sR0qv4F0nCPc';
-    const ADMIN_ID = '2068983666';
-
+    
     if (type === 'withdraw') {
       if (balance < amountNum) return alert("በቂ ባላንስ የለዎትም!");
-      setBalance(balance - amountNum);
-      const msg = `📤 የዊዝድሮው ጥያቄ\n📱 ስልክ: ${userPhone}\n💵 መጠን: ${amountNum} ETB`;
-      fetch(`https://telegram.org{BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}`);
-      socket.emit('updateServerBalance', { phone: userPhone, newBalance: balance - amountNum });
+      const newBal = balance - amountNum;
+      setBalance(newBal);
+      // ሰርቨሩ ላይ Withdraw ጥያቄ እንዲልክ
+      socket.emit('sendWithdrawRequest', { phone: userPhone, amount: amountNum });
     } else {
-      const msg = `💰 የዲፖዚት ጥያቄ\n📱 ስልክ: ${userPhone}\n💵 መጠን: ${amountNum} ETB`;
-      fetch(`https://telegram.org{BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(msg)}`);
+      // Deposit ጥያቄ ለሰርቨር ይላካል (ሰርቨሩ ለቴሌግራም ያስተላልፋል)
       socket.emit('sendDepositRequest', { phone: userPhone, amount: amountNum, screenshot });
     }
+    
     alert("ጥያቄዎ ተልኳል!");
-    setShowDeposit(false); setShowWithdraw(false); setMoney("");
+    setShowDeposit(false); 
+    setShowWithdraw(false); 
+    setMoney("");
   };
 
   const handlePlaceBet = (num) => {
     if (!isLoggedIn) { setShowAuth(true); return; }
     const currentBet = num === 1 ? bet1 : bet2;
     if (balance < currentBet.amount) return alert("ባላንስ የለዎትም!");
+    
     if (game.status === 'waiting') {
       const newBal = balance - currentBet.amount;
       setBalance(newBal);
@@ -144,18 +145,26 @@ const res = await fetch(`${SERVER_URL}/${authMode}`, {
       const newBal = balance + winAmt;
       setBalance(newBal);
       socket.emit('updateServerBalance', { phone: userPhone, newBalance: newBal });
-      if (num === 1) { setBet1({ ...bet1, isBetting: false, cashedOut: true }); setWin1(winAmt); }
-      else { setBet2({ ...bet2, isBetting: false, cashedOut: true }); setWin2(winAmt); }
+      if (num === 1) { 
+        setBet1({ ...bet1, isBetting: false, cashedOut: true }); 
+        setWin1(winAmt); 
+      } else { 
+        setBet2({ ...bet2, isBetting: false, cashedOut: true }); 
+        setWin2(winAmt); 
+      }
     }
   };
 
+  // --- የተቀረው የ UI ክፍል (Landing Page እና Game Layout) ---
+  // (አንተ ከላክኸው ጋር አንድ አይነት ስለሆነ ጊዜ ለመቆጠብ እዚህ አልደገምኩትም)
+  // ... (ከዚህ በታች ያለው UI ኮድህ እንዳለ ይቀጥላል)
   if (currentView === 'home') {
     return (
       <div className="landing-page">
         <nav className="nav-bar">
           <div className="logo-section"><span>የኢትዮጵያ ሎተሪ አገልግሎት</span></div>
           <div className="nav-links">
-            {!isLoggedIn ? <button onClick={() => setShowAuth(true)} className="dep-nav-btn">Login</button> :
+            {!isLoggedIn ? <button onClick={() => { setShowAuth(true); setAuthMode('login'); }} className="dep-nav-btn">Login</button> :
             <><button onClick={() => setShowDeposit(true)} className="dep-nav-btn">Deposit</button>
             <button onClick={() => setShowWithdraw(true)} className="with-nav-btn">Withdraw</button></>}
           </div>
@@ -172,9 +181,13 @@ const res = await fetch(`${SERVER_URL}/${authMode}`, {
         {showAuth && (
           <div className="modal-bg">
             <div className="auth-box">
-              <input type="text" placeholder="ስልክ" onChange={(e)=>setUserPhone(e.target.value)}/>
-              <input type="password" placeholder="የይለፍ ቃል" onChange={(e)=>setPassword(e.target.value)}/>
+              <h2>{authMode === 'login' ? 'ይግቡ' : 'ይመዝገቡ'}</h2>
+              <input type="text" placeholder="ስልክ" value={userPhone} onChange={(e)=>setUserPhone(e.target.value)}/>
+              <input type="password" placeholder="የይለፍ ቃል" value={password} onChange={(e)=>setPassword(e.target.value)}/>
               <button className="confirm-btn" onClick={handleAuthAction}>አረጋግጥ</button>
+              <p onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')} style={{cursor:'pointer', color:'gold', marginTop:'10px'}}>
+                {authMode === 'login' ? 'አካውንት የለዎትም? ይመዝገቡ' : 'አካውንት አለዎት? ይግቡ'}
+              </p>
               <button className="close-btn" onClick={()=>setShowAuth(false)}>ዝጋ</button>
             </div>
           </div>
@@ -189,6 +202,7 @@ const res = await fetch(`${SERVER_URL}/${authMode}`, {
           <button className="back-btn" onClick={() => setCurrentView('home')}>← ተመለስ</button>
           <div className="main-balance-display">{balance.toFixed(2)} ETB</div>
        </div>
+       {/* Game Layout Sections */}
        <div className="game-layout">
           <div className="sidebar">
              <div className="sidebar-header"><h4>LIVE BETS ({game.userCount})</h4></div>
@@ -230,6 +244,18 @@ const res = await fetch(`${SERVER_URL}/${authMode}`, {
              </div>
           </div>
        </div>
+
+       {/* Deposit/Withdraw Modals */}
+       {(showDeposit || showWithdraw) && (
+         <div className="modal-bg">
+           <div className="auth-box">
+             <h3>{showDeposit ? 'ብር ያስገቡ' : 'ብር ያውጡ'}</h3>
+             <input type="number" placeholder="መጠን (ETB)" value={money} onChange={(e)=>setMoney(e.target.value)}/>
+             <button className="confirm-btn" onClick={() => handleAction(showDeposit ? 'deposit' : 'withdraw')}>አረጋግጥ</button>
+             <button className="close-btn" onClick={()=>{setShowDeposit(false); setShowWithdraw(false);}}>ዝጋ</button>
+           </div>
+         </div>
+       )}
     </div>
   );
 }
