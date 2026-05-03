@@ -78,12 +78,13 @@ function App() {
   const handleAuthAction = async () => {
     if (!userPhone || !password) return alert("እባክዎ መረጃዎችን ያስገቡ!");
     
-    // ⚠️ እዚህ ጋር አድራሻውን አስተካክለነዋል (localhost የሚለው ጠፍቷል)
-    const res = await fetch(`${SERVER_URL}/${authMode}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: userPhone, password })
-    });
+    
+const res = await fetch(`${SERVER_URL}/${authMode}`, { 
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ phone: userPhone, password })
+});
+
     
     const data = await res.json();
     if (data.status === 'ok') {
