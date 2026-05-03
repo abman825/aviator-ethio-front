@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import './App.css';
 
 // ⚠️ ሰርቨሩን ከ Render ጋር ለማገናኘት የተስተካከለ አድራሻ
-const SERVER_URL = 'https://onrender.com';
+const SERVER_URL = 'https://aviator-ethio.onrender.com';
 const socket = io(SERVER_URL);
 
 function App() {
