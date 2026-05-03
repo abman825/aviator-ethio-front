@@ -7,7 +7,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Landing Page Styles */
+
 .landing-page {
   min-height: 100vh;
   background: radial-gradient(circle at top, #1e1e2e 0%, #0a0a0a 100%);
