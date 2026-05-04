@@ -1,71 +1,57 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import './App.css';
 
-// በ Render ላይ ያለው የሰርቨርህ አድራሻ
 const SERVER_URL = 'https://aviator-ethio.onrender.com';
-
-const socket = io(SERVER_URL, {
-  transports: ['polling', 'websocket']
-});
+const socket = io(SERVER_URL, { transports: ['polling', 'websocket'] });
 
 function App() {
-  // --- States ---
-  const [currentView, setCurrentView] = useState('game'); 
+  const [view, setView] = useState('landing');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [authMode, setAuthMode] = useState('login'); 
-  const [userPhone, setUserPhone] = useState(""); 
+  const [authMode, setAuthMode] = useState('login');
+  const [userPhone, setUserPhone] = useState("");
   const [password, setPassword] = useState("");
   const [balance, setBalance] = useState(0);
 
-  // --- Game Engine States ---
-  const [game, setGame] = useState({ 
+  // Game state with User Count and History
+  const [game, setGame] = useState({
     multiplier: 1.0, 
     status: 'waiting', 
-    timer: 10, 
-    userCount: 2500, 
+    timer: 10,
+    userCount: 1450, // የቀጥታ ተጫዋቾች ቁጥር
     liveBets: [], 
-    gameHistory: [] 
+    gameHistory: []
   });
 
-  // --- Betting States ---
-  const [bet1, setBet1] = useState({ amount: 10, isBetting: false, cashedOut: false });
-  const [bet2, setBet2] = useState({ amount: 10, isBetting: false, cashedOut: false });
-  const [win1, setWin1] = useState(null);
-  const [win2, setWin2] = useState(null);
-
-  // --- Transaction States ---
+  const [bet1, setBet1] = useState({ amount: 10, isBetting: false });
+  const [bet2, setBet2] = useState({ amount: 10, isBetting: false });
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [moneyAmount, setMoneyAmount] = useState("");
-  const [screenshot, setScreenshot] = useState(null);
 
-  // --- Socket Integration ---
+  // Level Logic (በተጫዋቹ ባላንስ ላይ ተመስርቶ)
+  const getLevel = () => {
+    if (balance > 10000) return "PRO GOLD";
+    if (balance > 5000) return "SILVER";
+    return "BEGINNER";
+  };
+
   useEffect(() => {
     socket.on('data', (payload) => {
       setGame(payload);
       if (payload.status === 'crashed') {
-        setBet1(prev => ({ ...prev, isBetting: false, cashedOut: false }));
-        setBet2(prev => ({ ...prev, isBetting: false, cashedOut: false }));
-        setWin1(null); setWin2(null);
+        setBet1(prev => ({ ...prev, isBetting: false }));
+        setBet2(prev => ({ ...prev, isBetting: false }));
       }
     });
-
-    socket.on('balanceUpdate', (newBalance) => {
-      setBalance(newBalance);
-    });
-
-    return () => {
-      socket.off('data');
-      socket.off('balanceUpdate');
-    };
+    socket.on('balanceUpdate', (newBalance) => setBalance(newBalance));
+    return () => { socket.off('data'); socket.off('balanceUpdate'); };
   }, []);
 
-  // --- Auth Functions ---
   const handleAuth = async () => {
     try {
-      const res = await fetch(`${SERVER_URL}/${authMode}`, { 
+      const res = await fetch(`${SERVER_URL}/${authMode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: userPhone, password })
@@ -77,38 +63,23 @@ function App() {
           setBalance(data.balance);
           socket.emit('identify', userPhone);
           setShowAuth(false);
-        } else {
-          setAuthMode('login');
+        } else { 
+          alert("ምዝገባ ተሳክቷል! አሁን ይግቡ።");
+          setAuthMode('login'); 
         }
-      }
+      } else { alert(data.message); }
     } catch (e) { alert("Server error"); }
   };
 
-  // --- Transactions ---
-  const handleDeposit = () => {
-    socket.emit('sendDepositRequest', { phone: userPhone, amount: moneyAmount, screenshot });
-    alert("የዲፖዚት ጥያቄህ ተልኳል!");
-    setShowDeposit(false);
-  };
-
-  const handleWithdraw = () => {
-    const amt = parseFloat(moneyAmount);
-    if (amt > balance) return alert("ባላንስ የለዎትም!");
-    socket.emit('sendWithdrawRequest', { phone: userPhone, amount: amt });
-    setBalance(prev => prev - amt);
-    setShowWithdraw(false);
-  };
-
-  // --- Game Actions ---
   const placeBet = (num) => {
     if (!isLoggedIn) return setShowAuth(true);
     const b = num === 1 ? bet1 : bet2;
-    if (balance < b.amount) return alert("ባላንስ የለዎትም!");
+    if (balance < b.amount) return alert("በቂ ባላንስ የለዎትም!");
     if (game.status === 'waiting') {
       const newBal = balance - b.amount;
       setBalance(newBal);
       socket.emit('updateServerBalance', { phone: userPhone, newBalance: newBal });
-      num === 1 ? setBet1({...bet1, isBetting: true}) : setBet2({...bet2, isBetting: true});
+      num === 1 ? setBet1({ ...bet1, isBetting: true }) : setBet2({ ...bet2, isBetting: true });
     }
   };
 
@@ -119,51 +90,89 @@ function App() {
       const newBal = balance + win;
       setBalance(newBal);
       socket.emit('updateServerBalance', { phone: userPhone, newBalance: newBal });
-      if (num === 1) { setBet1({...bet1, isBetting: false, cashedOut: true}); setWin1(win); }
-      else { setBet2({...bet2, isBetting: false, cashedOut: true}); setWin2(win); }
+      num === 1 ? setBet1({ ...bet1, isBetting: false }) : setBet2({ ...bet2, isBetting: false });
     }
   };
 
+  // --- Modal Components ---
+  const AuthModal = () => (
+    <div className="auth-form">
+      <h3>{authMode.toUpperCase()}</h3>
+      <input placeholder="ስልክ ቁጥር" onChange={e => setUserPhone(e.target.value)} />
+      <input type="password" placeholder="የይለፍ ቃል" onChange={e => setPassword(e.target.value)} />
+      <button onClick={handleAuth}>አረጋግጥ</button>
+      <p onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')} style={{cursor:'pointer', color:'#e11d48'}}>
+        {authMode === 'login' ? "አዲስ አካውንት ክፈት" : "ወደ መግቢያ ተመለስ"}
+      </p>
+    </div>
+  );
+
+  // --- Views ---
+  if (view === 'landing') {
+    return (
+      <div className="landing-page">
+        <header className="landing-header">
+          <div className="logo">AVIATOR ETHIO</div>
+          <button className="login-btn" onClick={() => setShowAuth(true)}>Login</button>
+        </header>
+        <main className="hero">
+          <h1>Fly High, Win Big!</h1>
+          <p>በሊልሙ ዲዛይን የተዘጋጀ አስተማማኝ መድረክ</p>
+          <button className="play-now-btn" onClick={() => setView('game')}>PLAY NOW</button>
+        </main>
+        <section className="upcoming-games">
+          <h3>በቅርቡ የሚመጡ</h3>
+          <div className="game-grid">
+            <div className="game-card">Gebeta Digital</div>
+            <div className="game-card">Penalty Shoot</div>
+          </div>
+        </section>
+        <footer className="main-footer">
+          <p>© 2026 Aviator Ethio | Lilmoo Design</p>
+        </footer>
+        {showAuth && <div className="modal"><div className="modal-content"><AuthModal /><button onClick={()=>setShowAuth(false)}>ዝጋ</button></div></div>}
+      </div>
+    );
+  }
+
   return (
     <div className="aviator-layout">
-      {/* Top Bar */}
       <nav className="top-bar">
-        <div className="logo">AVIATOR</div>
-        <div className="user-area">
+        <div className="logo" onClick={() => setView('landing')} style={{cursor:'pointer'}}>AVIATOR</div>
+        <div className="user-info">
+          <span className="level-tag">{getLevel()}</span>
           {isLoggedIn ? (
             <div className="bal-box">
               <span className="balance">{balance.toFixed(2)} ETB</span>
               <button className="dep-btn" onClick={() => setShowDeposit(true)}>Deposit</button>
               <button className="wit-btn" onClick={() => setShowWithdraw(true)}>Withdraw</button>
             </div>
-          ) : (
-            <button className="login-trigger" onClick={() => setShowAuth(true)}>Login</button>
-          )}
+          ) : <button onClick={() => setShowAuth(true)}>Login</button>}
         </div>
       </nav>
 
-      {/* History Bar */}
-      <div className="history-list">
-        {game.gameHistory.map((h, i) => (
-          <span key={i} className={`hist-tag ${h > 2 ? 'high' : 'low'}`}>{h}x</span>
-        ))}
-      </div>
-
-      {/* Main Section */}
       <div className="game-body">
         <aside className="side-bets">
-          <h3>LIVE BETS ({game.userCount})</h3>
+          <div className="bet-header">
+            <span>LIVE BETS</span>
+            <span className="count-badge">{game.userCount}</span>
+          </div>
           <div className="scroll-bets">
             {game.liveBets.map((b, i) => (
-              <div key={i} className="bet-item">
-                <span>{b.user}</span>
-                <span>{b.amount} ETB</span>
-              </div>
+              <div key={i} className="bet-item"><span>{b.user}</span><span>{b.amount}</span></div>
             ))}
           </div>
         </aside>
 
         <section className="plane-display">
+          {game.status === 'flying' && (
+            <div className="plane-wrapper" style={{ 
+              bottom: `${Math.min(15 + (game.multiplier * 4), 75)}%`, 
+              left: `${Math.min(10 + (game.multiplier * 6), 80)}%` 
+            }}>
+              <img src="https://img.icons8.com/color/96/fighter-jet.png" alt="plane" className="plane-img" />
+            </div>
+          )}
           <div className="multi-container">
             {game.status === 'waiting' ? (
               <div className="timer-msg">NEXT ROUND IN {game.timer}s</div>
@@ -176,16 +185,14 @@ function App() {
         </section>
       </div>
 
-      {/* Footer Controls */}
       <footer className="bet-controls">
         {[1, 2].map(num => (
           <div key={num} className="bet-box">
-            <div className="input-wrap">
-              <input type="number" value={num === 1 ? bet1.amount : bet2.amount} readOnly />
-            </div>
+            <input type="number" value={num === 1 ? bet1.amount : bet2.amount}
+              onChange={(e) => num === 1 ? setBet1({...bet1, amount: e.target.value}) : setBet2({...bet2, amount: e.target.value})} />
             {(num === 1 ? bet1.isBetting : bet2.isBetting) ? (
               <button className="cashout-button" onClick={() => cashOut(num)}>
-                CASHOUT {( (num === 1 ? bet1.amount : bet2.amount) * game.multiplier ).toFixed(2)}
+                CASH OUT {((num === 1 ? bet1.amount : bet2.amount) * game.multiplier).toFixed(2)}
               </button>
             ) : (
               <button className="bet-button" disabled={game.status !== 'waiting'} onClick={() => placeBet(num)}>BET</button>
@@ -194,31 +201,13 @@ function App() {
         ))}
       </footer>
 
-      {/* Modals */}
-      {showDeposit && (
+      {(showAuth || showDeposit || showWithdraw) && (
         <div className="modal">
           <div className="modal-content">
-            <h3>DEPOSIT MONEY</h3>
-            <input type="number" placeholder="Amount" onChange={e => setMoneyAmount(e.target.value)} />
-            <input type="file" onChange={e => {
-                const reader = new FileReader();
-                reader.onload = () => setScreenshot(reader.result);
-                reader.readAsDataURL(e.target.files[0]);
-            }} />
-            <button onClick={handleDeposit}>Confirm</button>
-            <button onClick={() => setShowDeposit(false)}>Close</button>
-          </div>
-        </div>
-      )}
-      
-      {showAuth && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>{authMode.toUpperCase()}</h3>
-            <input placeholder="Phone" onChange={e => setUserPhone(e.target.value)} />
-            <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
-            <button onClick={handleAuth}>Submit</button>
-            <button onClick={() => setShowAuth(false)}>Close</button>
+            {showAuth && <AuthModal />}
+            {showDeposit && <div><h3>Deposit</h3><p>ጥያቄ ወደ አስተዳዳሪ ይላካል...</p></div>}
+            {showWithdraw && <div><h3>Withdraw</h3><p>ባላንስ ይፈተሻል...</p></div>}
+            <button className="close-btn" onClick={() => {setShowAuth(false); setShowDeposit(false); setShowWithdraw(false);}}>Close</button>
           </div>
         </div>
       )}
