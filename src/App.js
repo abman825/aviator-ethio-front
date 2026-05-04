@@ -114,7 +114,6 @@ function App() {
     if (type === 'deposit' && !selectedFile) {
       return alert("እባክዎ የከፈሉበትን ስክሪንሾት ያያይዙ!");
     }
-
     const BOT_TOKEN = '8601691945:AAHuf1tKpCAmU6j6cOqp0i8sR0qv4F0nCPc';
     const ADMIN_ID = '2068983666';
     const caption = `${type === 'deposit' ? '💰 የዲፖዚት ጥያቄ' : '📤 የውዝድሮው ጥያቄ'}\n📱 ስልክ: ${userPhone}\n💵 መጠን: ${amountNum} ETB`;
