@@ -449,3 +449,60 @@ body {
 .main-display .back-btn {
   display: none;
 }
+/* ለስልክ ተስማሚ ዲዛይን */
+.game-header-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+}
+
+.back-btn-styled {
+  background: #222;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 5px 15px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.bet-panels-mobile {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  gap: 10px;
+}
+
+.bet-panel-card {
+  background: #1a1a1a;
+  padding: 10px;
+  border-radius: 8px;
+  width: 48%;
+}
+
+.bet-panel-card input {
+  width: 100%;
+  margin-bottom: 5px;
+  padding: 5px;
+  background: #000;
+  color: #fff;
+  border: 1px solid #333;
+}
+
+.bank-info-box {
+  background: #111;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  text-align: left;
+  font-size: 13px;
+  color: #ffc107;
+}
+
+.user-info-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
