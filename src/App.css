@@ -1,31 +1,40 @@
-/* --- 1. መሰረታዊ ቅንብሮች (Core Styles) --- */
+/* --- Root Variables & Reset --- */
 :root {
-  --main-bg: #0b0f19;
-  --panel-bg: #161d2b;
-  --accent: #fbbf24; /* ወርቃማ ለቁልፎች */
-  --danger: #e11d48; /* ቀይ ለክራሽ */
-  --success: #22c55e; /* አረንጓዴ ለባላንስ */
-  --text-main: #ffffff;
-  --text-muted: #94a3b8;
+  --primary-red: #e11d48;
+  --secondary-bg: #1a1a1a;
+  --accent-gold: #ffc107;
+  --text-white: #ffffff;
+  --card-bg: #262626;
+  --success-green: #22c55e;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-  margin: 0;
-  font-family: 'Inter', -apple-system, sans-serif;
-  background-color: var(--main-bg);
-  color: var(--text-main);
-  -webkit-font-smoothing: antialiased;
+  background-color: #0f0f0f;
+  color: var(--text-white);
+  overflow-x: hidden;
 }
 
-/* --- 2. የራስጌ ክፍል (Navigation Bar) --- */
+/* --- Layout Containers --- */
+.App-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .main-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 5%;
+  padding: 10px 20px;
   background: #000;
-  border-bottom: 1px solid #1e293b;
-  height: 60px;
+  border-bottom: 1px solid #333;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -33,476 +42,404 @@ body {
 
 .nav-logo {
   font-size: 1.2rem;
-  font-weight: 800;
-  color: var(--accent);
+  font-weight: bold;
+  color: var(--accent-gold);
   cursor: pointer;
-  letter-spacing: -0.5px;
 }
 
 .user-info {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 10px;
 }
+
+/* --- Buttons Styles --- */
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.login-btn { background: var(--primary-red); color: white; padding: 8px 16px; }
+.dep-btn { background: var(--success-green); color: white; padding: 6px 12px; font-size: 12px; }
+.with-btn { background: var(--primary-red); color: white; padding: 6px 12px; font-size: 12px; }
 
 .balance-box {
-  background: #111;
+  background: #333;
   padding: 6px 12px;
-  border-radius: 6px;
-  color: var(--success);
+  border-radius: 4px;
+  color: var(--success-green);
   font-weight: bold;
-  font-size: 0.9rem;
-  border: 1px solid #222;
 }
 
-.dep-btn, .with-btn, .login-btn {
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: opacity 0.2s;
-}
-
-.dep-btn { background: var(--success); color: white; }
-.with-btn { background: var(--danger); color: white; }
-.login-btn { background: var(--accent); color: #000; }
-.dep-btn:hover, .with-btn:hover { opacity: 0.8; }
-
-/* --- 3. መግቢያ ገጽ (Home View) --- */
-.hero {
-  padding: 60px 20px;
-  text-align: center;
-  background: linear-gradient(rgba(11, 15, 25, 0.8), rgba(11, 15, 25, 0.9)), 
-              url('https://unsplash.com');
-  background-size: cover;
-  background-position: center;
-}
-
-.hero h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--accent); }
-
-.play-cta {
-  background: var(--danger);
-  color: white;
-  border: none;
-  padding: 16px 45px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  border-radius: 50px;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(225, 29, 72, 0.4);
-  margin-top: 20px;
-}
-
-.games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 15px;
-  padding: 30px 10%;
-}
-
-.game-card {
-  background: var(--panel-bg);
-  padding: 20px;
-  border-radius: 12px;
-  text-align: center;
-  border: 1px solid #1e293b;
-}
-
-/* --- 4. አቪዬተር ጨዋታ (Aviator View) --- */
+/* --- Aviator Game Layout --- */
 .aviator-game {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  height: calc(100vh - 61px);
-  overflow: hidden;
+  grid-template-columns: 280px 1fr;
+  height: calc(100vh - 60px);
 }
 
-/* Sidebar - Live Bets */
 .game-sidebar {
-  background: #111827;
-  border-right: 1px solid #1e293b;
+  background: #111;
+  border-right: 1px solid #333;
   display: flex;
   flex-direction: column;
+  padding: 10px;
 }
 
 .sidebar-title {
-  padding: 12px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  background: #000;
-  text-align: center;
-  color: var(--text-muted);
+  font-size: 12px;
+  color: #888;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #333;
 }
 
-.bets-list { flex: 1; overflow-y: auto; padding: 10px; }
+.bets-list {
+  flex: 1;
+  overflow-y: auto;
+}
 
 .bet-item {
   display: flex;
   justify-content: space-between;
-  padding: 8px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 4px;
-  margin-bottom: 4px;
-  font-size: 0.8rem;
+  padding: 8px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #222;
 }
 
-/* Game Canvas & Display */
+.amt { color: var(--accent-gold); }
+
+/* --- Game Screen & Display --- */
 .game-screen {
   display: flex;
   flex-direction: column;
-  background: #000;
+  padding: 15px;
+  background: #161616;
   position: relative;
+}
+
+.top-game-bar {
+  margin-bottom: 10px;
+}
+
+.back-btn-top {
+  background: #333;
+  color: #ccc;
+  padding: 5px 12px;
+  font-size: 12px;
 }
 
 .history-bar {
   display: flex;
-  gap: 6px;
-  padding: 8px;
-  background: #0a0a0a;
+  gap: 8px;
   overflow-x: auto;
+  padding-bottom: 10px;
 }
 
 .history-tag {
-  background: #1e293b;
-  color: var(--accent);
+  background: #222;
   padding: 2px 10px;
   border-radius: 10px;
-  font-size: 0.7rem;
-  font-weight: bold;
+  font-size: 12px;
+  color: #ae7aff;
+  border: 1px solid #333;
 }
 
 .main-display {
   flex: 1;
+  background: #000;
+  border-radius: 12px;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
+  border: 1px solid #222;
+  margin-bottom: 15px;
+  min-height: 250px;
 }
 
 .main-display h2 {
-  font-size: 5rem;
-  font-weight: 900;
-  z-index: 10;
-  text-shadow: 0 0 30px rgba(255,255,255,0.1);
+  font-size: 3rem;
+  z-index: 2;
 }
 
-.crashed-text { color: var(--danger); }
+.crashed-text { color: var(--primary-red); }
 
 .aviator-plane {
   position: absolute;
   transition: all 0.1s linear;
-  z-index: 5;
 }
 
-/* Betting Panels */
+/* --- Bet Panels --- */
 .bet-panels {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 15px;
-  background: var(--panel-bg);
+  gap: 15px;
 }
 
 .panel {
-  background: #0f172a;
+  background: var(--secondary-bg);
   padding: 15px;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  position: relative;
+  gap: 10px;
+  border: 1px solid #333;
 }
 
 .panel input {
   background: #000;
-  border: 1px solid #334155;
+  border: 1px solid #444;
   color: white;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 6px;
   text-align: center;
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 1.1rem;
 }
 
-.place-bet-btn { background: var(--success); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-.cash-out-btn { background: var(--accent); color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-
-.win-overlay {
-  position: absolute;
-  top: -25px;
-  left: 30%;
-  background: var(--success);
+.place-bet-btn {
+  background: var(--success-green);
   color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-weight: bold;
-  animation: floatUp 1.5s forwards;
+  padding: 12px;
+  font-size: 1.2rem;
 }
 
-@keyframes floatUp {
-  0% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-40px); }
+.cash-out-btn {
+  background: #f97316;
+  color: white;
+  padding: 12px;
+  font-size: 1.2rem;
 }
 
-/* --- 5. ሞዳሎች (Modals) --- */
+/* --- Modals --- */
 .modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.85);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
-  backdrop-filter: blur(4px);
+  padding: 20px;
 }
 
 .modal-content {
-  background: var(--panel-bg);
-  width: 90%;
-  max-width: 320px;
+  background: var(--card-bg);
   padding: 25px;
-  border-radius: 16px;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 400px;
   text-align: center;
-  border: 1px solid #334155;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
-
-.modal-content h2, .modal-content h3 { margin-top: 0; color: var(--accent); }
 
 .modal-content input {
   width: 100%;
   padding: 12px;
   margin: 10px 0;
-  background: #000;
-  border: 1px solid #334155;
+  background: #111;
+  border: 1px solid #444;
   color: white;
-  border-radius: 8px;
-  box-sizing: border-box;
+  border-radius: 6px;
 }
 
 .primary-btn {
+  background: var(--primary-red);
+  color: white;
   width: 100%;
   padding: 12px;
-  background: var(--accent);
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.toggle-auth {
-  display: block;
-  margin: 15px 0;
-  font-size: 0.8rem;
-  color: var(--accent);
-  cursor: pointer;
-  text-decoration: underline;
+  margin-top: 10px;
 }
 
 .close-txt {
   background: transparent;
-  color: var(--text-muted);
-  border: none;
-  cursor: pointer;
-  font-size: 0.8rem;
+  color: #888;
+  margin-top: 15px;
+  font-size: 13px;
 }
 
-/* --- 6. ለሞባይል አመቺነት (Responsive) --- */
+.toggle-auth {
+  display: block;
+  margin-top: 15px;
+  font-size: 13px;
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+/* --- Home View --- */
+.home-view {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.hero h1 { margin-bottom: 10px; font-size: 2rem; }
+.play-cta {
+  background: var(--primary-red);
+  color: white;
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  margin-top: 20px;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.game-card {
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+}
+
+/* --- Mobile Responsiveness --- */
 @media (max-width: 768px) {
-  .aviator-game { grid-template-columns: 1fr; }
-  .game-sidebar { display: none; } /* ስልክ ላይ Live Bets ይደበቃል ለጨዋታው ቦታ እንዲበቃ */
-  
-  .main-display h2 { font-size: 3.5rem; }
-  .hero h1 { font-size: 1.8rem; }
-  
+  .aviator-game {
+    grid-template-columns: 1fr;
+  }
+
+  .game-sidebar {
+    display: none;
+  }
+
+  .main-display h2 {
+    font-size: 2.2rem;
+  }
+
   .bet-panels {
-    grid-template-columns: 1fr; /* ስልክ ላይ ቤቲንግ ፓነሉ አንዱ ከሌላው በታች ይሆናል */
+    grid-template-columns: 1fr;
+  }
+
+  .main-nav {
     padding: 10px;
   }
 
-  .main-nav { padding: 0 15px; }
   .nav-logo { font-size: 1rem; }
-  .dep-btn, .with-btn { padding: 6px 10px; font-size: 0.75rem; }
+
+  .hero h1 { font-size: 1.5rem; }
 }
 
-@media (max-width: 480px) {
-  .panel input { font-size: 1rem; padding: 8px; }
-  .place-bet-btn, .cash-out-btn { padding: 10px; }
+/* Animations */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
-/* --- የመጫወቻው ቦታ እንዲሰፋ እና Bet Panels እንዲታዩ ማስተካከያ --- */
 
+.win-overlay {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(34, 197, 94, 0.9);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  animation: pulse 0.5s infinite;
+}
+/* --- 1. አጠቃላይ ገጹን በአንድ ስክሪን መቆለፍ (Full Screen Lock) --- */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* ገጹ ወደ ታች እንዳይለጠጥ ይቆልፋል */
+}
+
+.App-container {
+  height: 100vh; /* የስክሪኑን ሙሉ ቁመት ብቻ ይይዛል */
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- 2. የጨዋታው መዋቅር (Game Layout) --- */
 .aviator-game {
   display: grid;
-  grid-template-columns: 240px 1fr; /* ኮምፒውተር ላይ */
-  height: calc(100vh - 60px);
-  overflow: hidden; /* ሙሉ ገጹ እንዳይንቀሳቀስ */
+  grid-template-columns: 280px 1fr;
+  flex: 1; /* የቀረውን የስክሪን ቦታ በሙሉ ይይዛል */
+  overflow: hidden;
 }
 
-/* የመሃል ጨዋታ ማሳያ (ተለቅ እንዲል) */
+/* የግራው ዝርዝር (Sidebar) በውስጡ ብቻ ስክሮል እንዲያደርግ */
+.game-sidebar {
+  background: #111;
+  border-right: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; 
+}
+
+.bets-list {
+  flex: 1;
+  overflow-y: auto; /* የሰው ዝርዝር ሲበዛ እዚህ ሳጥን ውስጥ ብቻ ስክሮል ይደረጋል */
+}
+
+/* --- 3. የጨዋታው ስክሪን (Main Display & Panels) --- */
 .game-screen {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  background: #000;
+  padding: 15px;
+  background: #161616;
+  overflow: hidden; /* ከስክሪኑ እንዳይወጣ ይከላከላል */
 }
 
 .main-display {
-  flex: 2; /* ከሌላው ይልቅ ለጨዋታው ማሳያ ሰፊ ቦታ ይሰጣል */
+  flex: 2; /* ከቤቲንግ ሳጥኖቹ የበለጠ ቦታ እንዲይዝ */
+  background: #000;
+  border-radius: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  background: radial-gradient(circle at center, #1e293b 0%, #000 80%);
+  min-height: 150px; /* በጣም እንዳይደቆስ */
+  margin-bottom: 10px;
 }
 
-.main-display h2 {
-  font-size: 4rem; /* ቁጥሩ ተለቅ እንዲል */
-  margin: 0;
-}
-
-/* የውርርድ ፓነሎች (Bet Panels) - አነስ ብለው እንዲታዩ */
+/* ቤቲንግ ሳጥኖች (Bet Panels) */
 .bet-panels {
-  flex: 1; /* ቁመቱ አነስተኛ እንዲሆን */
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 8px;
-  background: #111827;
-  border-top: 1px solid #1e293b;
+  grid-template-columns: 1fr 1fr; /* ኮምፒውተር ላይ ጎን ለጎን */
+  gap: 10px;
+  flex: 1; /* ከስክሪኑ ግርጌ ተለጥፈው እንዲቀመጡ */
 }
 
 .panel {
-  background: #0f172a;
-  padding: 8px 12px; /* Padding ቀነስነው */
-  border-radius: 10px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 5px;
+  justify-content: center; /* በሳጥኑ መሃል እንዲሆኑ */
 }
 
-.panel input {
-  padding: 6px;
-  font-size: 1rem;
-  border-radius: 5px;
-  height: 30px; /* ቁመቱን ገደብነው */
-}
+/* --- 4. ለተለያዩ ስክሪኖች (Responsiveness) --- */
 
-.place-bet-btn, .cash-out-btn {
-  padding: 10px;
-  font-size: 0.9rem;
-  border-radius: 6px;
-}
-
-/* --- ስልክ ላይ ሲሆን (Mobile Fix) --- */
+/* ለስልክ (Mobile) */
 @media (max-width: 768px) {
   .aviator-game {
-    grid-template-columns: 1fr; /* ዝርዝሩን እናጠፋዋለን */
+    grid-template-columns: 1fr; /* Sidebar ይጠፋል */
   }
-  
+
   .game-sidebar {
-    display: none; 
+    display: none; /* ስልክ ላይ ቦታ እንዲበቃ የሰዎች ዝርዝር ይደበቃል */
   }
 
   .main-display {
-    flex: 1.5; /* ጨዋታው ማሳያ ስልክ ላይም እንዲታይ */
+    flex: 1.5; /* ስልክ ላይ የጌሙ ስክሪን ትንሽ አጠር ይላል */
   }
 
   .bet-panels {
-    grid-template-columns: 1fr 1fr; /* ስልክ ላይም ጎን ለጎን እንዲሆኑ (ቦታ ለመቆጠብ) */
-    padding: 5px;
+    grid-template-columns: 1fr 1fr; /* ስልክ ላይም ጎን ለጎን እንዲሆኑ (ለቪየው ምቾት) */
+    gap: 5px;
   }
 
   .main-display h2 {
-    font-size: 3rem;
+    font-size: 2.2rem; /* የቁጥሩ መጠን ስልክ ላይ ትንሽ እንዲያንስ */
   }
 }
 
-/* የሊቭ ቤቲንግ ዝርዝር (Scroll እንዲሆን) */
-.bets-list {
-  flex: 1;
-  overflow-y: auto;
-  max-height: 80vh;
-}
-
-
-.back-btn-top {
-  background: #333;
-  color: white;
-  border: 1px solid #555;
-  padding: 5px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  margin-bottom: 10px;
-  font-size: 14px;
-  transition: 0.3s;
-}
-
-.back-btn-top:hover {
-  background: #e11d48;
-  border-color: #e11d48;
-}
-
-/* ዋናው ስክሪን ላይ ተደራራቢ እንዳይሆን መሃል ላይ ያለውን እናጥፋው */
-.main-display .back-btn {
-  display: none;
-}
-/* ለስልክ ተስማሚ ዲዛይን */
-.game-header-bar {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px;
-}
-
-.back-btn-styled {
-  background: #222;
-  color: #fff;
-  border: 1px solid #444;
-  padding: 5px 15px;
-  border-radius: 5px;
-  font-size: 14px;
-}
-
-.bet-panels-mobile {
-  display: flex;
-  justify-content: space-around;
-  padding: 10px;
-  gap: 10px;
-}
-
-.bet-panel-card {
-  background: #1a1a1a;
-  padding: 10px;
-  border-radius: 8px;
-  width: 48%;
-}
-
-.bet-panel-card input {
-  width: 100%;
-  margin-bottom: 5px;
-  padding: 5px;
-  background: #000;
-  color: #fff;
-  border: 1px solid #333;
-}
-
-.bank-info-box {
-  background: #111;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 15px;
-  text-align: left;
-  font-size: 13px;
-  color: #ffc107;
-}
-
-.user-info-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
+/* በጣም ትናንሽ ስልኮች ከሆኑ */
+@media (max-width: 480px) {
+  .bet-panels {
+    grid-template-columns: 1fr; /* ቤቲንግ ሳጥኖቹ አንዱ ከሌላው በታች ይሆናሉ */
+  }
 }
