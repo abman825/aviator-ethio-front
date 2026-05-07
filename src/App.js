@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import './App.css';
 
 // ሰርቨር አድራሻ - እንደ አስፈላጊነቱ ይቀይሩ
-const SERVER_URL = 'https://onrender.com';
+const SERVER_URL = 'https://aviator-ethio.onrender.com';
 const socket = io(SERVER_URL, { 
   transports: ['websocket', 'polling'], 
   upgrade: true,
