@@ -2,22 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import './App.css';
 
-// ሰርቨር አድራሻ
-const SERVER_URL = 'https://aviator-ethio.onrender.com';
+// ሰርቨር አድራሻ - እንደ አስፈላጊነቱ ይቀይሩ
+const SERVER_URL = 'https://onrender.com';
 const socket = io(SERVER_URL, { 
-  transports: ['websocket'], 
-  upgrade: false,
+  transports: ['websocket', 'polling'], 
+  upgrade: true,
   reconnection: true 
 });
 
 function App() {
-  // --- መተግበሪያ ሁኔታ (App State) ---
+  // --- 1. መተግበሪያ ሁኔታ (App State) ---
   const [currentView, setCurrentView] = useState('home'); 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login'); 
   
-  // --- የተጠቃሚ መረጃ (User State) ---
+  // --- 2. የተጠቃሚ መረጃ (User State) ---
   const [balance, setBalance] = useState(0);
   const [userPhone, setUserPhone] = useState(""); 
   const [password, setPassword] = useState("");
@@ -26,7 +26,7 @@ function App() {
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null); 
 
-  // --- የጨዋታ ሁኔታ (Game State) ---
+  // --- 3. የጨዋታ ሁኔታ (Game State) ---
   const [game, setGame] = useState({ 
     multiplier: 1.0, 
     status: 'waiting', 
@@ -36,7 +36,7 @@ function App() {
     gameHistory: [] 
   });
 
-  // --- የውርርድ ሁኔታ ---
+  // --- 4. የውርርድ ሁኔታ ---
   const [bet1, setBet1] = useState({ amount: 10, isBetting: false, cashedOut: false });
   const [bet2, setBet2] = useState({ amount: 10, isBetting: false, cashedOut: false });
   const [win1, setWin1] = useState(null);
@@ -52,6 +52,7 @@ function App() {
   useEffect(() => {
     socket.on('data', (payload) => {
       setGame(payload);
+      // ጌሙ ሲያልቅ (Crashed) መቆለፊያዎቹን እንከፍታለን
       if (payload.status === 'crashed') {
         setBet1(prev => ({ ...prev, isBetting: false, cashedOut: false }));
         setBet2(prev => ({ ...prev, isBetting: false, cashedOut: false }));
@@ -62,14 +63,18 @@ function App() {
 
     socket.on('balanceUpdate', (newBalance) => {
       setBalance(newBalance);
-      alert("✅ ባላንስዎ ተስተካክሏል: " + newBalance + " ETB");
+    });
+
+    socket.on('manual_balance_update', (data) => {
+        if(data.phone === userPhone) setBalance(data.balance);
     });
 
     return () => {
       socket.off('data');
       socket.off('balanceUpdate');
+      socket.off('manual_balance_update');
     };
-  }, []);
+  }, [userPhone]);
 
   // --- መግቢያና መመዝገቢያ (Auth) ---
   const handleAuthAction = async () => {
@@ -100,37 +105,28 @@ function App() {
     }
   };
 
-  // --- የገንዘብ እንቅስቃሴ (የተስተካከለ Withdraw Logic) ---
+  // --- የገንዘብ እንቅስቃሴ (Deposit/Withdraw) ---
   const handleAction = async (type) => {
     const amountNum = parseFloat(money);
     if (!amountNum || amountNum <= 0) return alert("ትክክለኛ መጠን ያስገቡ!");
-    
-    // 1. መጀመሪያ ባላንስ ይኑር አይኑር ማረጋገጥ (ለ Withdraw ብቻ)
-    if (type === 'withdraw' && balance < amountNum) {
-      return alert("በቂ ባላንስ የለዎትም!");
-    }
-    
-    // 2. ለዲፖዚት ስክሪንሾት መኖሩን ማረጋገጥ
-    if (type === 'deposit' && !selectedFile) {
-      return alert("እባክዎ የከፈሉበትን ስክሪንሾት ያያይዙ!");
-    }
+    if (type === 'withdraw' && balance < amountNum) return alert("በቂ ባላንስ የለዎትም!");
+    if (type === 'deposit' && !selectedFile) return alert("እባክዎ የከፈሉበትን ስክሪንሾት ያያይዙ!");
+
     const BOT_TOKEN = '8601691945:AAHuf1tKpCAmU6j6cOqp0i8sR0qv4F0nCPc';
     const ADMIN_ID = '2068983666';
     const caption = `${type === 'deposit' ? '💰 የዲፖዚት ጥያቄ' : '📤 የውዝድሮው ጥያቄ'}\n📱 ስልክ: ${userPhone}\n💵 መጠን: ${amountNum} ETB`;
 
     try {
-      // 3. መረጃውን ለቴሌግራም መላክ
       if (type === 'deposit' && selectedFile) {
         const formData = new FormData();
         formData.append('chat_id', ADMIN_ID);
         formData.append('photo', selectedFile);
         formData.append('caption', caption);
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+        await fetch(`https://telegram.org{BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
       } else {
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(caption)}`);
+        await fetch(`https://telegram.org{BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(caption)}`);
       }
 
-      // 4. ባላንስ መቀነስ (Withdraw ከሆነ ብቻ)
       if (type === 'withdraw') {
         const newBal = balance - amountNum;
         setBalance(newBal);
@@ -146,40 +142,41 @@ function App() {
     }
   };
 
-  // --- Bet Logic ---
+  // --- ውርርድ መመደብ (Bet Logic) ---
   const handlePlaceBet = (num) => {
-    if (!isLoggedIn) { setShowAuth(true); return; }
-    const currentBet = num === 1 ? bet1 : bet2;
-    if (balance < currentBet.amount) return alert("ባላንስ የለዎትም!");
-    if (game.status === 'waiting') {
-      const newBal = balance - currentBet.amount;
+    if (!isLoggedIn) return setShowAuth(true);
+    const cur = num === 1 ? bet1 : bet2;
+    const set = num === 1 ? setBet1 : setBet2;
+
+    // መቆለፊያ - ባላንስ ካለ፣ ጌሙ ገና ከሆነ እና ተጠቃሚው አስቀድሞ ካልተወራረደ ብቻ
+    if (balance >= cur.amount && game.status === 'waiting' && !cur.isBetting) {
+      const newBal = balance - cur.amount;
       setBalance(newBal);
       socket.emit('updateServerBalance', { phone: userPhone, newBalance: newBal });
-      if (num === 1) setBet1(prev => ({ ...prev, isBetting: true }));
-      else setBet2(prev => ({ ...prev, isBetting: true }));
+      socket.emit('placeBet', { phone: userPhone, amount: cur.amount });
+      set(prev => ({ ...prev, isBetting: true }));
     }
   };
 
+  // --- ብር ማውጣት (Cash Out) ---
   const handleCashOut = (num) => {
-    const currentBet = num === 1 ? bet1 : bet2;
-    if (currentBet.isBetting && game.status === 'flying') {
-      const winAmt = parseFloat((currentBet.amount * game.multiplier).toFixed(2));
+    const cur = num === 1 ? bet1 : bet2;
+    const set = num === 1 ? setBet1 : setBet2;
+    const setW = num === 1 ? setWin1 : setWin2;
+
+    if (cur.isBetting && !cur.cashedOut && game.status === 'flying') {
+      const winAmt = parseFloat((cur.amount * game.multiplier).toFixed(2));
       const newBal = balance + winAmt;
       setBalance(newBal);
       socket.emit('updateServerBalance', { phone: userPhone, newBalance: newBal });
-      if (num === 1) { 
-        setBet1(prev => ({ ...prev, isBetting: false, cashedOut: true })); 
-        setWin1(winAmt); 
-      } else { 
-        setBet2(prev => ({ ...prev, isBetting: false, cashedOut: true })); 
-        setWin2(winAmt); 
-      }
+      set(prev => ({ ...prev, isBetting: false, cashedOut: true })); 
+      setW(winAmt);
     }
   };
 
   return (
     <div className="App-container">
-      {/* Header */}
+      {/* --- Header --- */}
       <nav className="main-nav">
         <div className="nav-logo" onClick={() => setCurrentView('home')}>ኢትዮ ሎተሪ</div>
         <div className="nav-actions">
@@ -195,7 +192,7 @@ function App() {
         </div>
       </nav>
 
-      {/* Main Content */}
+      {/* --- Main Content --- */}
       <main className="content">
         {currentView === 'home' ? (
           <div className="home-view">
@@ -229,17 +226,12 @@ function App() {
             </div>
 
             <div className="game-screen">
-              {/* የተስተካከለው የተመለስ ቁልፍ ቦታ (ከታሪኩ በላይ) */}
               <div className="top-game-bar">
                 <button className="back-btn-top" onClick={() => setCurrentView('home')}>← ተመለስ</button>
               </div>
-
               <div className="history-bar">
-                {game.gameHistory?.map((h, i) => (
-                  <span key={i} className="history-tag">{h}x</span>
-                ))}
+                {game.gameHistory?.map((h, i) => <span key={i} className="history-tag">{h}x</span>)}
               </div>
-              
               <div className="main-display">
                 <h2 className={game.status === 'crashed' ? 'crashed-text' : ''}>
                   {game.status === 'waiting' ? `የሚቀረው ${game.timer}s` : `${game.multiplier.toFixed(2)}x`}
@@ -254,23 +246,41 @@ function App() {
                 )}
               </div>
 
+              {/* የውርርድ ፓነሎች ከጥብቅ መቆለፊያ ጋር */}
               <div className="bet-panels">
-                {[1, 2].map(id => (
-                  <div key={id} className="panel">
-                    <input 
-                      type="number" 
-                      value={id === 1 ? bet1.amount : bet2.amount} 
-                      onChange={(e) => id === 1 ? setBet1({...bet1, amount: Number(e.target.value)}) : setBet2({...bet2, amount: Number(e.target.value)})}
-                    />
-                    <button 
-                      className={(id === 1 ? bet1.isBetting : bet2.isBetting) ? "cash-out-btn" : "place-bet-btn"}
-                      onClick={() => (id === 1 ? bet1.isBetting : bet2.isBetting) ? handleCashOut(id) : handlePlaceBet(id)}
-                    >
-                      {(id === 1 ? bet1.isBetting : bet2.isBetting) ? `አውጣ ${( (id === 1 ? bet1.amount : bet2.amount) * game.multiplier).toFixed(2)}` : "መድብ"}
-                    </button>
-                    {(id === 1 ? win1 : win2) && <div className="win-overlay">+{id === 1 ? win1 : win2}</div>}
-                  </div>
-                ))}
+                {[1, 2].map(id => {
+                  const b = id === 1 ? bet1 : bet2;
+                  const setB = id === 1 ? setBet1 : setBet2;
+                  const w = id === 1 ? win1 : win2;
+                  return (
+                    <div key={id} className="panel">
+                      <input 
+                        type="number" 
+                        value={b.amount} 
+                        disabled={b.isBetting || game.status !== 'waiting'}
+                        onChange={(e) => id === 1 ? setBet1({...bet1, amount: Number(e.target.value)}) : setBet2({...bet2, amount: Number(e.target.value)})}
+                      />
+                      {game.status === 'waiting' || !b.isBetting ? (
+                        <button 
+                          className="place-bet-btn" 
+                          onClick={() => handlePlaceBet(id)}
+                          disabled={b.isBetting || game.status !== 'waiting'}
+                        >
+                          {b.isBetting ? "ተጠባባቂ..." : "መድብ"}
+                        </button>
+                      ) : (
+                        <button 
+                          className="cash-out-btn" 
+                          onClick={() => handleCashOut(id)}
+                          disabled={b.cashedOut || game.status !== 'flying'}
+                        >
+                          {b.cashedOut ? "ወጥቷል" : `አውጣ ${(b.amount * game.multiplier).toFixed(2)}`}
+                        </button>
+                      )}
+                      {w && <div className="win-overlay">+{w}</div>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -293,57 +303,37 @@ function App() {
         </div>
       )}
 
+      {/* --- Deposit/Withdraw Modal --- */}
       {(showDeposit || showWithdraw) && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <h3>{showDeposit ? '💰 ብር ማስገቢያ (Deposit)' : '📤 ብር ማውጫ (Withdraw)'}</h3>
-      
-      {/* ብር ማስገቢያ ሲሆን መረጃዎችን ያሳያል */}
-      {showDeposit && (
-        <div style={{
-          background: '#1a1a1a', 
-          padding: '10px', 
-          borderRadius: '8px', 
-          marginBottom: '15px', 
-          textAlign: 'left',
-          border: '1px border solid #333'
-        }}>
-          <p style={{color: '#ffc107', fontSize: '14px', fontWeight: 'bold', marginBottom: '5px'}}>👇 በዚህ አድራሻ ይላኩ</p>
-          <p style={{fontSize: '13px', margin: '2px 0'}}>🏦 <b>ንግድ ባንክ (CBE):</b> 1000XXXXXXXXX</p>
-          <p style={{fontSize: '13px', margin: '2px 0'}}>📱 <b>ቴሌቢር (telebirr):</b> 09XXXXXXXX</p>
-          <p style={{fontSize: '13px', margin: '2px 0'}}>👤 <b>ስም:</b> አብርሃም ...</p>
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>{showDeposit ? '💰 Deposit' : '📤 Withdraw'}</h3>
+            {showDeposit && (
+              <div className="bank-info" style={{background: '#1a1a1a', padding: '10px', borderRadius: '8px', marginBottom: '15px', textAlign: 'left'}}>
+                <p style={{color: '#ffc107', fontSize: '14px', fontWeight: 'bold'}}>👇 በዚህ አድራሻ ይላኩ</p>
+                <p style={{fontSize: '13px', margin: '2px 0'}}>🏦 ንግድ ባንክ (CBE): 1000XXXXXXXXX</p>
+                <p style={{fontSize: '13px', margin: '2px 0'}}>📱 telebirr: 09XXXXXXXX</p>
+                <p style={{fontSize: '13px', margin: '2px 0'}}>👤 ስም: አብርሃም ...</p>
+              </div>
+            )}
+            <input 
+              type="number" 
+              placeholder="መጠን (ETB)" 
+              value={money} 
+              onChange={(e)=>setMoney(e.target.value)} 
+              style={{width: '100%', padding: '10px', marginBottom: '10px'}}
+            />
+            {showDeposit && (
+              <div style={{marginTop: '10px', textAlign: 'left'}}>
+                <label style={{fontSize: '12px', color: '#ffc107', display: 'block', marginBottom: '5px'}}>የክፍያ ስክሪንሾት ያያይዙ:</label>
+                <input type="file" accept="image/*" onChange={(e) => setSelectedFile(e.target.files[0])} style={{fontSize: '12px', color: 'white'}}/>
+              </div>
+            )}
+            <button className="primary-btn" style={{marginTop: '15px'}} onClick={() => handleAction(showDeposit ? 'deposit' : 'withdraw')}>አረጋግጥ</button>
+            <button className="close-txt" onClick={() => {setShowDeposit(false); setShowWithdraw(false); setMoney(""); setSelectedFile(null);}}>ዝጋ</button>
+          </div>
         </div>
       )}
-
-      <input 
-        type="number" 
-        placeholder="መጠን (ETB)" 
-        value={money} 
-        onChange={(e)=>setMoney(e.target.value)}
-        style={{width: '100%', padding: '10px', marginBottom: '10px', borderRadius: '5px', border: 'none'}}
-      />
-      
-      {showDeposit && (
-        <div style={{marginTop: '10px', textAlign: 'left'}}>
-          <label style={{fontSize: '12px', color: '#ffc107', display: 'block', marginBottom: '5px'}}>የክፍያ ስክሪንሾት ያያይዙ:</label>
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={(e) => setSelectedFile(e.target.files[0])} 
-            style={{fontSize: '12px', color: 'white'}}
-          />
-        </div>
-      )}
-
-      <button className="primary-btn" style={{marginTop: '15px'}} onClick={() => handleAction(showDeposit ? 'deposit' : 'withdraw')}>
-        አረጋግጥ
-      </button>
-      <button className="close-txt" onClick={() => {setShowDeposit(false); setShowWithdraw(false); setMoney(""); setSelectedFile(null);}}>
-        ዝጋ
-      </button>
-    </div>
-  </div>
-)}
     </div>
   );
 }
