@@ -443,3 +443,53 @@ html, body {
     grid-template-columns: 1fr; /* ቤቲንግ ሳጥኖቹ አንዱ ከሌላው በታች ይሆናሉ */
   }
 }
+
+/* 40 ሰው እንዲታይ ዝርዝሩን Scroll እንዲያደርግ ያደርገዋል */
+.bets-list {
+  max-height: 480px !important; /* ቁመቱን ከፍ ያደርገዋል */
+  overflow-y: auto !important;  /* ወደ ታች እንድታይ ያደርገዋል */
+  display: block !important;
+}
+
+.bet-item {
+  height: 35px; /* የእያንዳንዱን ተጫዋች ቦታ ያሳጥራል */
+  margin-bottom: 2px;
+}
+/* 40 ተጫዋቾች በዝርዝር እንዲታዩ Scroll እንዲያደርግ */
+.game-sidebar .bets-list {
+    height: 450px !important; 
+    overflow-y: auto !important;
+    display: block !important;
+}
+
+.bet-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 3px;
+    font-size: 12px;
+}
+
+
+/* 40 ተጫዋቾች በዝርዝር እንዲታዩና ወደታች ዝቅ ብለህ እንድታያቸው (Scroll) */
+.bets-list {
+    max-height: 450px !important; /* የዝርዝሩ ቁመት */
+    overflow-y: auto !important;  /* ዝርዝሩ ሲበዛ Scroll እንዲያደርግ */
+    display: block !important;
+}
+
+.bet-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 2px;
+    font-size: 11px; /* ጽሁፉን ትንሽ አነስ አድርገን ብዙ ሰው እንዲታይ */
+}
+
+/* ስክሮሉ (መሸብለያው) እንዳይታይ መደበቅ */
+.bets-list::-webkit-scrollbar {
+    display: none;
+}
+

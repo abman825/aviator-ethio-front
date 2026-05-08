@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import './App.css';
 
-// ሰርቨር አድራሻ - እንደ አስፈላጊነቱ ይቀይሩ
 const SERVER_URL = 'https://aviator-ethio.onrender.com';
 const socket = io(SERVER_URL, { 
   transports: ['websocket', 'polling'], 
@@ -11,13 +10,11 @@ const socket = io(SERVER_URL, {
 });
 
 function App() {
-  // --- 1. መተግበሪያ ሁኔታ (App State) ---
   const [currentView, setCurrentView] = useState('home'); 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState('login'); 
   
-  // --- 2. የተጠቃሚ መረጃ (User State) ---
   const [balance, setBalance] = useState(0);
   const [userPhone, setUserPhone] = useState(""); 
   const [password, setPassword] = useState("");
@@ -26,17 +23,16 @@ function App() {
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null); 
 
-  // --- 3. የጨዋታ ሁኔታ (Game State) ---
+  // --- ጌም ስቴት (እዚህ ጋር userCount ተጨምሯል) ---
   const [game, setGame] = useState({ 
     multiplier: 1.0, 
     status: 'waiting', 
     timer: 10, 
-    userCount: 2000, 
+    userCount: 2500, // Default value
     liveBets: [], 
     gameHistory: [] 
   });
 
-  // --- 4. የውርርድ ሁኔታ ---
   const [bet1, setBet1] = useState({ amount: 10, isBetting: false, cashedOut: false });
   const [bet2, setBet2] = useState({ amount: 10, isBetting: false, cashedOut: false });
   const [win1, setWin1] = useState(null);
@@ -44,15 +40,15 @@ function App() {
 
   const upcomingGames = [
     { id: 1, name: "Crazy Time", img: "🎡" },
-    { id: 2, name: "Mines", img: "💣" },
-    { id: 3, name: "Penalty", img: "⚽" }
+    { id: 2, name: "Keno", img: "⚽" },
+    { id: 3, name: "Penalty", img: "💣" }
   ];
 
-  // --- Socket.io ግንኙነት ---
   useEffect(() => {
     socket.on('data', (payload) => {
+      // ሰርቨሩ የላከውን ሙሉ ዳታ (userCount እና liveBets ጨምሮ) ይቀበላል
       setGame(payload);
-      // ጌሙ ሲያልቅ (Crashed) መቆለፊያዎቹን እንከፍታለን
+
       if (payload.status === 'crashed') {
         setBet1(prev => ({ ...prev, isBetting: false, cashedOut: false }));
         setBet2(prev => ({ ...prev, isBetting: false, cashedOut: false }));
@@ -61,22 +57,16 @@ function App() {
       }
     });
 
-    socket.on('balanceUpdate', (newBalance) => {
-      setBalance(newBalance);
-    });
-
     socket.on('manual_balance_update', (data) => {
         if(data.phone === userPhone) setBalance(data.balance);
     });
 
     return () => {
       socket.off('data');
-      socket.off('balanceUpdate');
       socket.off('manual_balance_update');
     };
   }, [userPhone]);
 
-  // --- መግቢያና መመዝገቢያ (Auth) ---
   const handleAuthAction = async () => {
     if (!userPhone || !password) return alert("እባክዎ መረጃዎችን ያስገቡ!");
     try {
@@ -105,7 +95,6 @@ function App() {
     }
   };
 
-  // --- የገንዘብ እንቅስቃሴ (Deposit/Withdraw) ---
   const handleAction = async (type) => {
     const amountNum = parseFloat(money);
     if (!amountNum || amountNum <= 0) return alert("ትክክለኛ መጠን ያስገቡ!");
@@ -122,9 +111,9 @@ function App() {
         formData.append('chat_id', ADMIN_ID);
         formData.append('photo', selectedFile);
         formData.append('caption', caption);
-        await fetch(`https://telegram.org{BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
       } else {
-        await fetch(`https://telegram.org{BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(caption)}`);
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=${encodeURIComponent(caption)}`);
       }
 
       if (type === 'withdraw') {
@@ -142,13 +131,11 @@ function App() {
     }
   };
 
-  // --- ውርርድ መመደብ (Bet Logic) ---
   const handlePlaceBet = (num) => {
     if (!isLoggedIn) return setShowAuth(true);
     const cur = num === 1 ? bet1 : bet2;
     const set = num === 1 ? setBet1 : setBet2;
 
-    // መቆለፊያ - ባላንስ ካለ፣ ጌሙ ገና ከሆነ እና ተጠቃሚው አስቀድሞ ካልተወራረደ ብቻ
     if (balance >= cur.amount && game.status === 'waiting' && !cur.isBetting) {
       const newBal = balance - cur.amount;
       setBalance(newBal);
@@ -158,7 +145,6 @@ function App() {
     }
   };
 
-  // --- ብር ማውጣት (Cash Out) ---
   const handleCashOut = (num) => {
     const cur = num === 1 ? bet1 : bet2;
     const set = num === 1 ? setBet1 : setBet2;
@@ -176,7 +162,6 @@ function App() {
 
   return (
     <div className="App-container">
-      {/* --- Header --- */}
       <nav className="main-nav">
         <div className="nav-logo" onClick={() => setCurrentView('home')}>ኢትዮ ሎተሪ</div>
         <div className="nav-actions">
@@ -192,7 +177,6 @@ function App() {
         </div>
       </nav>
 
-      {/* --- Main Content --- */}
       <main className="content">
         {currentView === 'home' ? (
           <div className="home-view">
@@ -214,14 +198,19 @@ function App() {
         ) : (
           <div className="aviator-game">
             <div className="game-sidebar">
-              <div className="sidebar-title">LIVE BETS ({game.userCount})</div>
+              {/* እዚህ ጋር userCount ይታያል */}
+              <div className="sidebar-title">LIVE BETS ({game.userCount || 2500})</div>
               <div className="bets-list">
-                {game.liveBets?.map((b, i) => (
-                  <div key={i} className="bet-item">
-                    <span>{b.user || 'Guest'}</span>
-                    <span className="amt">{b.amount} ETB</span>
-                  </div>
-                ))}
+                {game.liveBets && game.liveBets.length > 0 ? (
+                  game.liveBets.map((b, i) => (
+                    <div key={i} className="bet-item">
+                      <span>{b.user}</span>
+                      <span className="amt">{b.amount} ETB</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="loading-bets">Loading bets...</div>
+                )}
               </div>
             </div>
 
@@ -246,7 +235,6 @@ function App() {
                 )}
               </div>
 
-              {/* የውርርድ ፓነሎች ከጥብቅ መቆለፊያ ጋር */}
               <div className="bet-panels">
                 {[1, 2].map(id => {
                   const b = id === 1 ? bet1 : bet2;
@@ -287,7 +275,6 @@ function App() {
         )}
       </main>
 
-      {/* --- Auth Modal --- */}
       {showAuth && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -303,7 +290,6 @@ function App() {
         </div>
       )}
 
-      {/* --- Deposit/Withdraw Modal --- */}
       {(showDeposit || showWithdraw) && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -312,8 +298,8 @@ function App() {
               <div className="bank-info" style={{background: '#1a1a1a', padding: '10px', borderRadius: '8px', marginBottom: '15px', textAlign: 'left'}}>
                 <p style={{color: '#ffc107', fontSize: '14px', fontWeight: 'bold'}}>👇 በዚህ አድራሻ ይላኩ</p>
                 <p style={{fontSize: '13px', margin: '2px 0'}}>🏦 ንግድ ባንክ (CBE): 1000XXXXXXXXX</p>
-                <p style={{fontSize: '13px', margin: '2px 0'}}>📱 telebirr: 09XXXXXXXX</p>
-                <p style={{fontSize: '13px', margin: '2px 0'}}>👤 ስም: አብርሃም ...</p>
+                <p style={{fontSize: '13px', margin: '2px 0'}}>📱 telebirr: 0913085190</p>
+                <p style={{fontSize: '13px', margin: '2px 0'}}>👤 ስም: mesefen ...</p>
               </div>
             )}
             <input 
