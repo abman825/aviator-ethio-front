@@ -1281,3 +1281,28 @@ body, html {
     font-weight: 900 !important;
 }
 
+
+
+/* ለስልክ ብቻ የሚሆን ማስተካከያ (@media) */
+@media (max-width: 600px) {
+  .keno-grid {
+    /* በረድፍ 10 ቁጥር እንዲሆንና ክፍተቱ እንዲጠብ */
+    grid-template-columns: repeat(10, 1fr) !important;
+    gap: 3px !important; /* የጎንና ጎን ክፍተት */
+    row-gap: 3px !important; /* የላይና የታች ክፍተት */
+    padding: 5px !important;
+  }
+
+  .keno-num {
+    /* በስልክ ላይ ቁመታቸው በጣም እንዳይረዝም */
+    height: 32px !important; 
+    font-size: 11px !important; /* ቁጥሮቹ እንዲበቁ መጠናቸውን ትንሽ መቀነስ */
+    border-radius: 4px !important;
+  }
+  
+  /* በቁጥሮቹ መያዣ ሳጥን ዙሪያ ያለውን ክፍተት መቀነስ */
+  .keno-grid-container {
+    padding: 10px 5px !important;
+    margin-top: 5px !important;
+  }
+}
