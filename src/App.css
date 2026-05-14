@@ -844,7 +844,7 @@ body {
 
   .keno-grid {
     grid-template-columns: repeat(10, 1fr) !important;
-    gap: 4px !important;
+    gap: 0px !important;
     max-width: 100% !important;
   }
 
@@ -856,7 +856,7 @@ body {
   .keno-controls-fixed {
     max-width: 100% !important;
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 0px !important;
     padding: 12px !important;
   }
 
@@ -1288,8 +1288,8 @@ body, html {
   .keno-grid {
     /* በረድፍ 10 ቁጥር እንዲሆንና ክፍተቱ እንዲጠብ */
     grid-template-columns: repeat(10, 1fr) !important;
-    gap: 3px !important; /* የጎንና ጎን ክፍተት */
-    row-gap: 3px !important; /* የላይና የታች ክፍተት */
+    gap: 0px !important; /* የጎንና ጎን ክፍተት */
+    row-gap: 0px !important; /* የላይና የታች ክፍተት */
     padding: 5px !important;
   }
 
