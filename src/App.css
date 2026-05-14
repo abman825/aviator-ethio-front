@@ -1147,3 +1147,137 @@ body, html {
   color: var(--accent-gold);
   transform: translateY(-1px);
 }
+
+
+
+
+.App-container {
+  min-height: 100vh;
+  width: 100%;
+  
+  /* Reference the image in the assets folder relative to App.css */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('./assets/cc.jpg');
+  
+  /* Ensures the image covers the whole screen and stays fixed while scrolling */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  
+  color: white;
+}
+
+
+
+
+.keno-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr); /* 10 ረድፍ እንዲሆን ያደርጋል */
+  
+  /* ስፋቱን ለመጨመር (ለምሳሌ ወደ 800px) */
+  width: 95%; 
+  max-width: 800px; 
+  
+  /* ቁመቱን ለመጨመር */
+  min-height: 500px; 
+  
+  /* በቁጥሮቹ መካከል ያለውን ክፍተት ለመቆጣጠር */
+  gap: 0px; 
+  
+  margin: 20px auto; /* መሃል ላይ እንዲሆን */
+  padding: 15px;
+}
+
+
+/* የካርዶቹ አጠቃላይ መልክ */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.game-card {
+  height: 180px;
+  border-radius: 15px;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.game-card:hover {
+  transform: scale(1.02);
+}
+
+
+
+.game-card-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  text-align: center;
+}
+
+.play-btn-small {
+  background: #ffc107;
+  border: none;
+  padding: 5px 15px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-top: 5px;
+  color: #000;
+}
+
+.disabled-card {
+  background: #232a34;
+  cursor: default;
+}
+.play-btn-small {
+  background: linear-gradient(45deg, #ffc107, #ff9800);
+  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+  border: none;
+  color: black;
+  padding: 8px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.play-btn-small:hover {
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.6);
+  filter: brightness(1.1);
+}
+/* የአቪዬተር ካርድ ማስተካከያ */
+.aviator-card {
+    /* 1. ምስሉን ደማቅ ለማድረግ ጥቁር ጥላ (Overlay) እንጨምራለን */
+    background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.8)), 
+                url('./assets/aa.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    border: 2px solid #ff1053; /* ደማቅ ቀይ መስመር ለAviator */
+    box-shadow: 0 0 20px rgba(255, 16, 83, 0.4); /* የብርሃን ውጤት */
+}
+
+/* የኬኖ ካርድ ማስተካከያ */
+.keno-card {
+    background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.8)), 
+                url('./assets/ab.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    border: 2px solid #6c5ce7; /* ደማቅ ቫዮሌት መስመር ለKeno */
+    box-shadow: 0 0 20px rgba(108, 92, 231, 0.4);
+}
+
+/* በካርዱ ላይ ያሉ ጽሁፎች ደምቀው እንዲታዩ */
+.game-card h3 {
+    font-size: 1.5rem !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,1) !important; /* የጽሁፍ ጥላ */
+    color: #ffffff !important;
+    font-weight: 900 !important;
+}
+

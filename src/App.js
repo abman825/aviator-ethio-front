@@ -421,26 +421,48 @@ const [permanentTicketHistory, setPermanentTicketHistory] = useState([]); // የ
       <main className="content">
         
         {/* --- A. HOME SYSTEM VIEW --- */}
-        {currentView === 'home' && (
-          <div className="home-view">
-            <div className="hero">
-              <h1>ትልቅ ዕድል እና ስጦታዎችን ያሸንፉ!</h1>
-              <div className="home-buttons">
-                <button className="play-cta" onClick={() => setCurrentView('game')}>አቪያተር ይጫወቱ</button>
-                <button className="play-cta keno-btn" onClick={() => setCurrentView('keno')}>ኬኖ (Keno)</button>
-              </div>
-            </div>
-            <div className="games-grid">
-              {upcomingGames.map(g => (
-                <div key={g.id} className="game-card">
-                  <span className="g-icon">{g.img}</span>
-                  <h4>{g.name}</h4>
-                  <button disabled>በቅርቡ...</button>
-                </div>
-              ))}
-            </div>
+{currentView === 'home' && (
+  <div className="home-view">
+    <div className="hero">
+      <h1>ትልቅ ዕድል እና ስጦታዎችን ያሸንፉ!</h1>
+      <div className="home-buttons">
+        <button className="play-cta" onClick={() => setCurrentView('game')}>አቪያተር ይጫወቱ</button>
+        <button className="play-cta keno-btn" onClick={() => setCurrentView('keno')}>ኬኖ (Keno)</button>
+      </div>
+    </div>
+
+    {/* የጌሞች ዝርዝር */}
+    <div className="games-grid">
+      
+      {/* 1. አቪዬተር ካርድ */}
+      <div className="game-card aviator-card" onClick={() => setCurrentView('game')}>
+        <div className="game-card-overlay">
+          <h3>አቪዬተር (Aviator)</h3>
+          <button className="play-btn-small">አሁኑኑ ይጫወቱ</button>
+        </div>
+      </div>
+
+      {/* 2. ኬኖ ካርድ */}
+      <div className="game-card keno-card" onClick={() => setCurrentView('keno')}>
+        <div className="game-card-overlay">
+          <h3>ኬኖ (Keno)</h3>
+          <button className="play-btn-small">አሁኑኑ ይጫወቱ</button>
+        </div>
+      </div>
+
+      {/* 3. ሌሎች ወደፊት የሚመጡ ጌሞች (Spin & Win, Football) */}
+      {upcomingGames.map(g => (
+        <div key={g.id} className="game-card disabled-card">
+          <div className="game-card-overlay">
+            <span className="g-icon">{g.img}</span>
+            <h4>{g.name}</h4>
+            <span className="coming-soon">በቅርቡ...</span>
           </div>
-        )}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* --- B. KENO VIEW LAYOUT --- */}
         {currentView === 'keno' && (
@@ -634,7 +656,7 @@ const [permanentTicketHistory, setPermanentTicketHistory] = useState([]); // የ
           <div className="ball-counter">{drawnNumbers.length} / 20</div>
         </div>
       ) : (
-        <div className="keno-timer-display">ቀጣይ ጨዋታ በ: {kenoTimeLeft}s</div>
+        <div className="keno-timer-display"> : {kenoTimeLeft}s</div>
       )}
     </div>
   </div>
@@ -693,6 +715,7 @@ const [permanentTicketHistory, setPermanentTicketHistory] = useState([]); // የ
                   ))}
                 </div>
               </div>
+
 
               <div className="keno-controls-fixed">
                 <div className="bet-input-group">
