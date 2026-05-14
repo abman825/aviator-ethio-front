@@ -812,80 +812,91 @@ body {
   100% { transform: translate(-50%, 0); opacity: 1; }
 }
 
-/* ==========================================================================
+
+ 
+  /* ==========================================================================
    8. RESPONSIVE DESIGN (ለሞባይል ስልክ ስክሪን ሙሉ በሙሉ የተቀየረ አቀማመጥ)
    ========================================================================== */
 @media (max-width: 768px) {
   
-  /* አጠቃላይ ገጽ ቁልፍ ማስተካከያ - በሞባይል ሙሉ ገጹ ወደ ታች እንዲንሸራተት መፍቀድ */
-  body, html, .App-container {
+  /* 1. ዋናው ሌይአውት ወደ Column መቀየር አለበት (Sidebar ወደ ታች እንዲወርድ) */
+  .keno-view-layout {
+    flex-direction: column !important; /* ይህ ነው ጎን ለጎን የነበረውን ወደ ታች የሚያደርገው */
     height: auto !important;
+    max-height: none !important;
     overflow-y: auto !important;
   }
 
-  /* ------------------------------------------------------------------------
-     ሀ. የኬኖ ሞባይል ማስተካከያ (የኬኖ ሳይድባር ከጨዋታው በታች እንዲሆን)
-     ------------------------------------------------------------------------ */
-  .keno-view-layout {
-    flex-direction: column !important; /* የጎንዮሽ የነበረውን ወደ ታች ማድረግ */
-    height: auto !important;
-    max-height: none !important;
-    min-height: auto !important;
-    overflow-y: visible !important;
-  }
-
-  /* የኬኖ ዋናው የቁጥር ሰሌዳ መጀመሪያ ከላይ እንዲታይ ማድረግ */
+  /* 2. የቁጥሮቹ ሰሌዳ መያዣ (Main Content) ሙሉ ስፋት እንዲይዝ */
   .keno-main-content {
-    order: 1; /* መጀመሪያ ላይ እንዲቀመጥ */
     width: 100% !important;
-    padding: 12px !important;
-    overflow-y: visible !important;
+    max-width: 100% !important;
+    padding: 5px !important;
+    order: 1; /* የቁጥር ሰሌዳው አንደኛ እንዲሆን */
   }
 
+  /* 3. ሰሌዳው (Grid) ሙሉ በሙሉ ተዘርግቶ እንዲታይ */
   .keno-grid {
+    display: grid !important;
     grid-template-columns: repeat(10, 1fr) !important;
-    gap: 0px !important;
-    max-width: 100% !important;
+    gap: 2px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    min-height: auto !important;
   }
 
+  /* 4. ቁጥሮቹ (ሳጥኖቹ) ተለጥጠው እንዲታዩ */
   .keno-num {
-    font-size: 13px !important;
-    border-radius: 4px !important;
+    width: 100% !important;
+    height: 35px !important; /* በሞባይል ለመንካት ምቹ እንዲሆን ቁመቱን ትንሽ ጨምረነዋል */
+    font-size: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
+  /* 5. የጎን ዝርዝሮች (Sidebar) ወደ ታች እንዲወርዱ */
+  .sidebar-keno {
+    width: 100% !important;
+    order: 2; /* ከሰሌዳው በታች እንዲሆን */
+    margin-top: 20px !important;
+    height: 400px !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border-color) !important;
+  }
+
+  /* 6. የውርርድ መቆጣጠሪያዎች ሰፊ እንዲሆኑ */
   .keno-controls-fixed {
-    max-width: 100% !important;
-    flex-direction: column !important;
-    gap: 0px !important;
-    padding: 12px !important;
+    position: relative !important;
+    width: 100% !important;
+    bottom: 0 !important;
+    padding: 15px !important;
+    background: var(--bg-secondary) !important;
   }
-
+}
   .bet-input-group {
     width: 100% !important;
+    display: flex !important;
     justify-content: space-between !important;
   }
 
   .keno-submit-bet {
     width: 100% !important;
+    padding: 10px !important; /* ትንሽ ቀጠን እንዲል */
   }
 
-  /* የኬኖ ሳይድባር (ተጫዋቾች/ታሪክ) ከጨዋታው በታች እንዲወርድ ማድረግ */
-  .sidebar-keno {
-    order: 2; /* ከዋናው ሰሌዳ በታች እንዲሆን */
-    width: 100% !important;
-    height: 380px !important; /* ቁመቱ ተለክቶ በራሱ ውስጥ ብቻ እንዲንሸራተት */
-    max-height: 380px !important;
-    border-right: none !important;
-    border-top: 2px solid var(--border-color) !important;
-    margin-top: 20px !important;
-    overflow: hidden !important;
-  }
-
-  .players-list, .history-list, .results-list {
-    max-height: calc(100% - 45px) !important;
+/* ==========================================================================
+   8. RESPONSIVE DESIGN (ለሞባይል ስልክ ስክሪን ሙሉ በሙሉ የተቀየረ አቀማመጥ)
+   ========================================================================== */
+/* ==========================================================================
+   8. RESPONSIVE DESIGN (ለሞባይል ስልክ ስክሪን ሙሉ በሙሉ የተቀየረ አቀማመጥ)
+   ========================================================================== */
+@media (max-width: 768px) {
+  
+  body, html, .App-container {
+    height: auto !important;
     overflow-y: auto !important;
   }
-
 
   /* ==========================================================================
    b. RESPONSIVE DESIGN (የአቪያተር ውርርድ አዝራሮች በሞባይል ጎን ለጎን እንዲሆኑ ማስተካከያ)
@@ -968,8 +979,9 @@ body {
     overflow-y: auto !important;
     height: calc(100% - 45px) !important;
   }
-}
 
+
+}
 /* ==========================================================================
    9. MY TICKET HISTORY LAYOUT (የቆረጡዋቸው ቲኬቶች ታሪክ ዲዛይን)
    ========================================================================== */
@@ -1283,26 +1295,129 @@ body, html {
 
 
 
-/* ለስልክ ብቻ የሚሆን ማስተካከያ (@media) */
-@media (max-width: 600px) {
-  .keno-grid {
-    /* በረድፍ 10 ቁጥር እንዲሆንና ክፍተቱ እንዲጠብ */
-    grid-template-columns: repeat(10, 1fr) !important;
-    gap: 0px !important; /* የጎንና ጎን ክፍተት */
-    row-gap: 0px !important; /* የላይና የታች ክፍተት */
-    padding: 5px !important;
+
+/* ==========================================================================
+   AVIATOR LAYOUT (ኮምፒውተር ላይ ጎን ለጎን እንዲሆን)
+   ========================================================================== */
+
+/* 1. በDesktop ስክሪን ላይ ጎን ለጎን እንዲሆኑ */
+.aviator-main-layout {
+  display: flex !important;
+  flex-direction: row !important; /* በኮምፒውተር ጎን ለጎን ያደርጋቸዋል */
+  width: 100%;
+  height: calc(100vh - 65px); /* ሙሉ ቁመቱን እንዲይዝ */
+  overflow: hidden;
+}
+
+/* 2. የጨዋታው ክፍል (ግራ በኩል) */
+.aviator-game-content {
+  flex: 1 !important; /* የቀረውን ሰፊ ቦታ እንዲይዝ */
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+/* 3. የSidebar ክፍል (ቀኝ በኩል - Live Bets) */
+.aviator-sidebar {
+  width: 300px !important; /* የሳይድባር ስፋት በኮምፒውተር */
+  background-color: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (ለሞባይል ብቻ የሚቀየር)
+   ========================================================================== */
+@media (max-width: 768px) {
+  
+  /* ሞባይል ላይ አንዱ ከታች አንዱ እንዲሆን */
+  .aviator-main-layout {
+    flex-direction: column !important; 
+    height: auto !important;
+    overflow-y: auto !important;
   }
 
-  .keno-num {
-    /* በስልክ ላይ ቁመታቸው በጣም እንዳይረዝም */
-    height: 32px !important; 
-    font-size: 11px !important; /* ቁጥሮቹ እንዲበቁ መጠናቸውን ትንሽ መቀነስ */
-    border-radius: 4px !important;
+  .aviator-game-content {
+    width: 100% !important;
+    order: 1; /* ጨዋታው መጀመሪያ እንዲታይ */
+  }
+
+  .aviator-sidebar {
+    width: 100% !important; /* ሞባይል ላይ ሙሉ ስፋት */
+    height: 400px !important; /* ቁመቱ ተለክቶ */
+    order: 2; /* ሳይድባሩ ከጨዋታው በታች እንዲሆን */
+    border-left: none !important;
+    border-top: 1px solid var(--border-color);
   }
   
-  /* በቁጥሮቹ መያዣ ሳጥን ዙሪያ ያለውን ክፍተት መቀነስ */
-  .keno-grid-container {
-    padding: 10px 5px !important;
-    margin-top: 5px !important;
+  /* ሞባይል ላይ ቤቲንግ ፓነሉ ጎን ለጎን እንዲሆን ያደረግከው */
+  .aviator-bet-interface-panel {
+    flex-direction: row !important;
+    gap: 8px !important;
   }
+}
+
+
+
+/* ከላይ ያለውን የቆየ body ኮድ በዚህ ተካው ወይም አሻሽለው */
+body, html {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh; /* ቁመቱ ቢያንስ የስክሪኑን ያህል ይሁን */
+  overflow-x: hidden; /* ወደ ጎን እንዳይሄድ */
+  overflow-y: auto !important; /* ወደ ታች እንዲንሸራተት ይፈቅዳል */
+}
+
+.App-container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto !important; /* እዚህ ጋር hidden የነበረውን ወደ auto ቀይረው */
+  
+  /* Background ምስሉ በሙሉ ገጹ እንዲቀጥል */
+  background-attachment: fixed; 
+}
+
+/* ፉተሩ ከካርዶቹ ስር በትክክል እንዲቀመጥ */
+.main-footer {
+  width: 100%;
+  background-color: #12161c;
+  padding: 40px 20px;
+  margin-top: 60px; /* ከካርዶቹ በቂ ርቀት እንዲኖረው */
+  position: static; /* ካርዶቹ ላይ እንዳይደራረብ */
+  clear: both;
+  border-top: 2px solid rgba(255, 215, 0, 0.1);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-links a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.footer-links a:hover {
+  color: #ffc107;
+  opacity: 1;
 }

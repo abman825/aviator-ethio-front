@@ -421,6 +421,8 @@ const [permanentTicketHistory, setPermanentTicketHistory] = useState([]); // የ
       <main className="content">
         
         {/* --- A. HOME SYSTEM VIEW --- */}
+        
+
 {currentView === 'home' && (
   <div className="home-view">
     <div className="hero">
@@ -450,6 +452,9 @@ const [permanentTicketHistory, setPermanentTicketHistory] = useState([]); // የ
         </div>
       </div>
 
+
+
+
       {/* 3. ሌሎች ወደፊት የሚመጡ ጌሞች (Spin & Win, Football) */}
       {upcomingGames.map(g => (
         <div key={g.id} className="game-card disabled-card">
@@ -462,6 +467,28 @@ const [permanentTicketHistory, setPermanentTicketHistory] = useState([]); // የ
       ))}
     </div>
   </div>
+)}
+
+{/* የመግቢያ ገጽ (Home) ላይ ብቻ ፉተሩ እንዲታይ */}
+{currentView === 'home' && (
+  <footer className="main-footer">
+    <div className="footer-content">
+      <div className="footer-section">
+        <h4>ኢትዮ ሎተሪ</h4>
+        <p>ታማኝ እና ፈጣን የጨዋታ መድረክ።</p>
+      </div>
+      
+      <div className="footer-links">
+        <a href="#terms">ደንቦች እና መመሪያዎች</a>
+        <a href="#privacy">የግል መረጃ ጥበቃ</a>
+        <a href="#about">ስለ እኛ</a>
+      </div>
+
+      <div className="footer-bottom">
+        <p>&copy; 2026 Ethio Lottery. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
 )}
 
         {/* --- B. KENO VIEW LAYOUT --- */}
