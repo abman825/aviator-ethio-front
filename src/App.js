@@ -225,12 +225,13 @@ const [permanentTicketHistory, setPermanentTicketHistory] = useState([]); // የ
   const handleAuthAction = async () => {
     if (!userPhone || !password) return alert("እባክዎ መረጃውን በትክክል ያስገቡ!");
     try {
-      const res = await fetch(`${SERVER_URL}/${authMode}`, { 
+    const response = await fetch(`${SERVER_URL}/${authMode}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: userPhone, password })
       });
-      const data = await res.json();
+
+      const data = await response.json();
       if (data.status === 'ok') {
         if (authMode === 'login') {
           setIsLoggedIn(true);
