@@ -1421,3 +1421,46 @@ body, html {
   color: #ffc107;
   opacity: 1;
 }
+
+.hero-slider {
+  height: 400px;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 1s ease-in-out; /* ምስሉ ሲቀየር Fade እንዲያደርግ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  margin-top: 20px;
+  color: white;
+  text-align: center;
+}
+
+.hero-content h1 {
+  font-size: 2.8rem;
+  margin-bottom: 10px;
+  font-weight: 800;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  margin-bottom: 25px;
+  opacity: 0.9;
+}
+
+.play-cta {
+  padding: 15px 35px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border: none;
+  margin: 0 10px;
+  transition: 0.3s;
+}
+
+.aviator-btn { background-color: #e11d48; color: white; }
+.keno-btn { background-color: #6366f1; color: white; }
+
+.play-cta:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }

@@ -25,6 +25,14 @@ const kenoPayoutTable = {
   10: [0, 0, 0, 0, 0, 0, 0, 0, 500, 2500, 10000]    
 };
 
+const HERO_IMAGES = [
+  "https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1000",
+  "https://images.unsplash.com/photo-1547394765-185e1e68f34e?q=80&w=1000",
+  "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1000",
+  "https://images.unsplash.com/photo-1614028674026-a65e31bfd27c?q=80&w=1000",
+  "https://images.unsplash.com/photo-1523875194681-bedd468c58bf?q=80&w=1000"
+];
+
 function App() {
   // --- 1. COMMON STATES ---
   const [currentView, setCurrentView] = useState('home'); 
@@ -38,6 +46,7 @@ function App() {
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null); 
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // --- 2. KENO STATES ---
   const [selectedNumbers, setSelectedNumbers] = useState([]);
@@ -67,7 +76,15 @@ function App() {
     { id: 3, name: 'Virtual Football', img: '⚽' }
   ];
 
-  // --- 4. FAKE PLAYERS GENERATION ---
+  // --- 4. ምስሎችን በየ 3 ሰከንዱ ለመቀየር (የተስተካከለ) ---
+  useEffect(() => {
+    const slideTimer = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev === HERO_IMAGES.length - 1 ? 0 : prev + 1));
+    }, 3000);
+    return () => clearInterval(slideTimer);
+  }, []);
+
+  // --- 5. FAKE PLAYERS GENERATION ---
   useEffect(() => {
     const baseNames = ["a***n", "b***u", "m***k", "r***t", "s***i", "w***v", "z***y", "l***d", "k***x", "e***s"];
     const totalPlayers = 40; 
@@ -97,6 +114,15 @@ function App() {
     setFakePlayers(newData.sort((a, b) => b.bet - a.bet));
   }, [gameId]);
 
+  // --- 1. ምስሎችን በየ 3 ሰከንዱ ለመቀየር (ለብቻው የወጣ) ---
+  useEffect(() => {
+    const slideTimer = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev === HERO_IMAGES.length - 1 ? 0 : prev + 1));
+    }, 3000);
+    return () => clearInterval(slideTimer);
+  }, []);
+
+  // --- 5. KENO TIMER LOGIC ---
   // --- 5. KENO TIMER LOGIC ---
   useEffect(() => {
     if (currentView === 'keno' && kenoTimeLeft > 0 && !isDrawingKeno) {
@@ -355,7 +381,7 @@ function App() {
     <div className="App-container">
       {/* GLOBAL NAVBAR */}
       <nav className="main-nav">
-        <div className="nav-logo" onClick={() => setCurrentView('home')}>ኢትዮ ሎተሪ</div>
+        <div className="nav-logo" onClick={() => setCurrentView('home')}>ኢትዮ aviator</div>
         <div className="nav-actions">
           {isLoggedIn && <span className="balance-box">{balance.toFixed(2)} ETB</span>}
           {!isLoggedIn ? (
@@ -378,10 +404,28 @@ function App() {
         {/* --- A. HOME SYSTEM VIEW --- */}
         {currentView === 'home' && (
           <div className="home-view">
-            <div className="hero">
+            {/* እዚህ ጋር ነው ለውጡ የተደረገው - Hero Slider */}
+            <div 
+              className="hero" 
+              style={{ 
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${HERO_IMAGES[currentImageIndex]})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                transition: 'background-image 0.8s ease-in-out', // ለስላሳ ለውጥ
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '350px',
+                borderRadius: '15px',
+                color: 'white',
+                textAlign: 'center',
+                marginBottom: '30px'
+              }}
+            >
               <h1>ትልቅ ዕድል እና ስጦታዎችን ያሸንፉ!</h1>
               <div className="home-buttons">
-                <button className="play-cta" onClick={() => setCurrentView('game')}>አቪያተር ይጫወቱ</button>
+                <button className="play-cta" onClick={() => setCurrentView('game')}>አቪዬተር ይጫወቱ</button>
                 <button className="play-cta keno-btn" onClick={() => setCurrentView('keno')}>ኬኖ (Keno)</button>
               </div>
             </div>
@@ -389,7 +433,7 @@ function App() {
             <div className="games-grid">
               <div className="game-card aviator-card" onClick={() => setCurrentView('game')}>
                 <div className="game-card-overlay">
-                  <h3>አቪያተር (Aviator)</h3>
+                  <h3>አቪዬተር (Aviator)</h3>
                   <button className="play-btn-small">አሁኑኑ ይጫወቱ</button>
                 </div>
               </div>
@@ -418,7 +462,7 @@ function App() {
           <footer className="main-footer">
             <div className="footer-content">
               <div className="footer-section">
-                <h4>ኢትዮ ሎተሪ</h4>
+                <h4>ኢትዮ aviator</h4>
                 <p>ታማኝ እና ፈጣን የጨዋታ መድረክ</p>
               </div>
               <div className="footer-links">
@@ -427,12 +471,12 @@ function App() {
                 <a href="#about">ስለ እኛ</a>
               </div>
               <div className="footer-bottom">
-                <p>&copy; 2026 Ethio Lottery. All rights reserved.</p>
+                <p>&copy; 2026 Ethio aviator. All rights reserved.</p>
               </div>
             </div>
           </footer>
         )}
-
+      
         {/* --- B. KENO VIEW LAYOUT --- */}
         {currentView === 'keno' && (
           <div className="keno-view-layout">
@@ -615,7 +659,7 @@ function App() {
               {selectedNumbers.length > 0 && !isDrawingKeno && (
                 <div className="live-payout-estimator" style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '8px', marginBottom: '15px', textAlign: 'center' }}>
                   <span style={{ color: 'var(--accent-gold)', fontWeight: 'bold', display: 'block', marginBottom: '8px', fontSize: '14px' }}>
-                    🎯 የመረጡት ቁጥር ብዛት: {selectedNumbers.length} | ከተመቱ የሚከፈልዎት የሽልማት ግምት፡
+                    🎯 : {selectedNumbers.length} |
                   </span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
                     {(kenoPayoutTable[selectedNumbers.length] || []).map((multiplier, hits) => {
@@ -797,8 +841,8 @@ function App() {
               <div className="bank-info" style={{background: '#1a1a1a', padding: '10px', borderRadius: '8px', marginBottom: '15px', textAlign: 'left'}}>
                 <p style={{color: '#ffc107', fontSize: '14px', fontWeight: 'bold'}}>👇 በዚህ አድራሻ ይላኩ</p>
                 <p style={{fontSize: '13px', margin: '2px 0'}}>🏦 ንግድ ባንክ (CBE): 1000XXXXXXXXX</p>
-                <p style={{fontSize: '13px', margin: '2px 0'}}>📱 telebirr: 0913085190</p>
-                <p style={{fontSize: '13px', margin: '2px 0'}}>👤 ስም: mesefen ...</p>
+                <p style={{fontSize: '13px', margin: '2px 0'}}>📱 telebirr: 0930804408</p>
+                <p style={{fontSize: '13px', margin: '2px 0'}}>👤 ስም: melaku lema ...</p>
               </div>
             )}
             <input 
